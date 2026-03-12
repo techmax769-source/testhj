@@ -37,7 +37,6 @@
       min-height: 100vh;
     }
 
-    /* Custom Scrollbar */
     ::-webkit-scrollbar {
       width: 10px;
       height: 10px;
@@ -53,7 +52,6 @@
       background: var(--accent-hover);
     }
 
-    /* Navbar */
     .navbar {
       position: fixed;
       top: 0;
@@ -125,13 +123,11 @@
       cursor: pointer;
     }
 
-    /* Main Content */
     .main-content {
       padding-top: var(--header-height);
       min-height: 100vh;
     }
 
-    /* Home View */
     #home-view {
       padding: 20px 5%;
     }
@@ -171,7 +167,6 @@
       100% { opacity: 1; }
     }
 
-    /* Channels Grid */
     .channels-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -199,9 +194,12 @@
     .channel-thumbnail {
       width: 100%;
       aspect-ratio: 16/9;
-      background: #1a1f2f;
+      background: linear-gradient(135deg, #1a1f2f, #2a2f3f);
       position: relative;
       overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .channel-thumbnail img {
@@ -209,6 +207,25 @@
       height: 100%;
       object-fit: cover;
       transition: transform 0.3s ease;
+    }
+
+    .thumbnail-fallback {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #1a1f2f, #2a2f3f);
+      color: var(--accent);
+      font-size: 3rem;
+      font-weight: bold;
+    }
+
+    .thumbnail-fallback span {
+      font-size: 1rem;
+      margin-top: 10px;
+      color: var(--text-secondary);
     }
 
     .channel-card:hover .channel-thumbnail img {
@@ -273,7 +290,6 @@
       gap: 4px;
     }
 
-    /* Player View */
     #player-view {
       min-height: calc(100vh - var(--header-height));
       background: #000;
@@ -290,11 +306,27 @@
       aspect-ratio: 16/9;
       background: #000;
       position: relative;
+      overflow: hidden;
     }
 
+    /* YouTube Player Container */
     #youtube-player {
       width: 100%;
       height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    /* Hide YouTube logo and other branding */
+    .ytp-logo,
+    .ytp-watermark,
+    .ytp-youtube-button,
+    .ytp-title-link,
+    .ytp-title-channel,
+    .ytp-title-text,
+    .ytp-ce-element {
+      display: none !important;
     }
 
     .no-signal {
@@ -391,7 +423,6 @@
       font-size: 1rem;
     }
 
-    /* Developer Card */
     .developer-card {
       margin: 30px 5%;
       padding: 20px;
@@ -459,7 +490,6 @@
       box-shadow: 0 10px 20px rgba(37, 211, 102, 0.3);
     }
 
-    /* Recommended Section */
     .recommended-section {
       padding: 0 5% 40px;
     }
@@ -500,7 +530,10 @@
     .rec-thumbnail {
       width: 100%;
       aspect-ratio: 16/9;
-      background: #1a1f2f;
+      background: linear-gradient(135deg, #1a1f2f, #2a2f3f);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .rec-thumbnail img {
@@ -525,7 +558,6 @@
       color: var(--text-secondary);
     }
 
-    /* Loading States */
     .loading-spinner {
       display: flex;
       flex-direction: column;
@@ -548,7 +580,32 @@
       to { transform: rotate(360deg); }
     }
 
-    /* Responsive */
+    .rotate-hint {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(0,0,0,0.6);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 30px;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 15;
+      backdrop-filter: blur(5px);
+      border: 1px solid var(--border-color);
+      animation: fadeInOut 3s ease-in-out;
+      pointer-events: none;
+    }
+
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translateY(10px); }
+      10% { opacity: 1; transform: translateY(0); }
+      90% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-10px); }
+    }
+
     @media (max-width: 768px) {
       .navbar {
         padding: 0 15px;
@@ -595,11 +652,11 @@
       display: none !important;
     }
   </style>
-  <!-- Load YouTube IFrame API -->
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <!-- YouTube IFrame API -->
   <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
-  <!-- Navbar -->
   <nav class="navbar">
     <div class="logo" onclick="router.navigate('home')">
       <i class="fas fa-tv"></i>
@@ -614,9 +671,7 @@
     </div>
   </nav>
 
-  <!-- Main Content -->
   <div class="main-content">
-    <!-- Home View -->
     <div id="home-view">
       <div class="page-title">
         <i class="fas fa-satellite-dish"></i>
@@ -625,14 +680,12 @@
       <div id="channelsGrid" class="channels-grid"></div>
     </div>
 
-    <!-- Player View -->
     <div id="player-view" class="hidden">
       <div class="player-container">
         <div class="video-wrapper" id="videoWrapper">
           <!-- YouTube Player Container for IFrame API -->
           <div id="youtube-player"></div>
 
-          <!-- No Signal overlay for when channel is offline -->
           <div class="no-signal hidden" id="noSignal">
             <i class="fas fa-broadcast-tower"></i>
             <h2>No Signal</h2>
@@ -645,6 +698,11 @@
               Back to Channels
             </button>
           </div>
+
+          <div class="rotate-hint hidden" id="rotateHint">
+            <i class="fas fa-rotate"></i>
+            <span>Rotate for fullscreen</span>
+          </div>
         </div>
         
         <div class="channel-info-bar" id="playerChannelInfo">
@@ -652,7 +710,6 @@
           <div class="channel-details" id="playerChannelDetails"></div>
         </div>
 
-        <!-- Developer Card -->
         <div class="developer-card">
           <div class="dev-info">
             <div class="dev-avatar">M</div>
@@ -669,7 +726,6 @@
           </div>
         </div>
 
-        <!-- Recommended Channels -->
         <div class="recommended-section">
           <div class="section-header">
             <h2>Recommended Channels</h2>
@@ -682,14 +738,14 @@
   </div>
 
   <script>
-    // ==================== CONFIGURATION ====================
     const TV_API = 'https://channelsbackendyt.vercel.app/api';
     let allChannels = [];
     let currentChannel = null;
+    let thumbnailCache = new Map();
+    let liveStreamsCache = new Map();
     let youtubePlayer = null;
     let playerReady = false;
 
-    // ==================== ROUTER ====================
     const router = {
       navigate(view, channelId = null) {
         if (view === 'home') {
@@ -705,38 +761,41 @@
       }
     };
 
-    // ==================== YOUTUBE PLAYER API ====================
-    // This function is called automatically when YouTube API is ready
+    // YouTube API ready
     window.onYouTubeIframeAPIReady = function() {
-      console.log('YouTube IFrame API is ready');
+      console.log('YouTube IFrame API ready');
       playerReady = true;
-      // If we have a channel waiting to be played, play it now
-      if (currentChannel && document.getElementById('player-view').classList.contains('hidden') === false) {
-        playChannel(currentChannel);
-      }
     };
 
     function initPlayer(videoId) {
       if (!playerReady) {
-        console.log('Player not ready yet, waiting...');
-        return false;
+        console.log('Player not ready, will play when API loads');
+        // Store videoId to play when ready
+        setTimeout(() => {
+          if (playerReady && videoId) {
+            createPlayer(videoId);
+          }
+        }, 500);
+        return;
       }
+      createPlayer(videoId);
+    }
 
-      // Destroy existing player if it exists
+    function createPlayer(videoId) {
       if (youtubePlayer) {
         youtubePlayer.destroy();
       }
 
-      // Create new player
       youtubePlayer = new YT.Player('youtube-player', {
         videoId: videoId,
         playerVars: {
           'autoplay': 1,
-          'mute': 1,
+          'mute': 0,
           'controls': 1,
           'modestbranding': 1,
           'rel': 0,
           'showinfo': 0,
+          'iv_load_policy': 3,
           'fs': 1,
           'playsinline': 1,
           'enablejsapi': 1,
@@ -748,22 +807,32 @@
           'onError': onPlayerError
         }
       });
-      return true;
     }
 
     function onPlayerReady(event) {
-      console.log('Player is ready');
+      console.log('Player ready');
       document.getElementById('noSignal').classList.add('hidden');
-      event.target.playVideo();
+      
+      // Try to hide YouTube logo using CSS (already in styles)
+      const iframe = document.getElementById('youtube-player');
+      if (iframe) {
+        // Inject CSS to hide YouTube logo
+        const style = document.createElement('style');
+        style.textContent = `
+          .ytp-logo, .ytp-watermark, .ytp-youtube-button, 
+          .ytp-title-link, .ytp-title-channel, .ytp-title-text,
+          .ytp-ce-element {
+            display: none !important;
+          }
+        `;
+        iframe.contentDocument?.head.appendChild(style);
+      }
     }
 
     function onPlayerStateChange(event) {
       if (event.data === YT.PlayerState.PLAYING) {
-        console.log('Video is playing');
-      } else if (event.data === YT.PlayerState.ENDED) {
-        console.log('Video ended');
-      } else if (event.data === YT.PlayerState.PAUSED) {
-        console.log('Video paused');
+        console.log('Playing');
+        document.getElementById('noSignal').classList.add('hidden');
       }
     }
 
@@ -772,7 +841,6 @@
       showNoSignal();
     }
 
-    // ==================== API FUNCTIONS ====================
     async function fetchAllChannels() {
       try {
         const response = await fetch(`${TV_API}/channels`);
@@ -786,17 +854,57 @@
     }
 
     async function searchLiveStreams(query) {
+      const cacheKey = `live_${query}`;
+      if (liveStreamsCache.has(cacheKey)) {
+        const cached = liveStreamsCache.get(cacheKey);
+        if (Date.now() - cached.timestamp < 120000) {
+          return cached.data;
+        }
+      }
+
       try {
         const response = await fetch(`${TV_API}/search?q=${encodeURIComponent(query)}&max=5`);
         const data = await response.json();
-        return data.results || [];
+        const results = data.results || [];
+        
+        liveStreamsCache.set(cacheKey, {
+          data: results,
+          timestamp: Date.now()
+        });
+        
+        return results;
       } catch (error) {
         console.error('Error searching live streams:', error);
         return [];
       }
     }
 
-    // ==================== VIDEO PLAYER ====================
+    async function getChannelThumbnail(channelName, channelId) {
+      if (thumbnailCache.has(channelId)) {
+        return thumbnailCache.get(channelId);
+      }
+      
+      try {
+        const results = await searchLiveStreams(channelName);
+        if (results && results.length > 0 && results[0].thumbnail) {
+          const thumbnail = results[0].thumbnail;
+          thumbnailCache.set(channelId, thumbnail);
+          return thumbnail;
+        }
+      } catch (error) {
+        console.error(`Error getting thumbnail for ${channelName}:`, error);
+      }
+      return null;
+    }
+
+    function handleImageError(img, channelName) {
+      console.warn(`Failed to load image for: ${channelName}`, img.src);
+      const fallback = document.createElement('div');
+      fallback.className = 'thumbnail-fallback';
+      fallback.innerHTML = `<i class="fas fa-tv"></i><span>${channelName}</span>`;
+      img.parentNode.replaceChild(fallback, img);
+    }
+
     function stopVideo() {
       if (youtubePlayer) {
         youtubePlayer.stopVideo();
@@ -817,10 +925,34 @@
       document.getElementById('noSignal').classList.add('hidden');
     }
 
+    function showRotateHint() {
+      const hint = document.getElementById('rotateHint');
+      hint.classList.remove('hidden');
+      setTimeout(() => {
+        hint.classList.add('hidden');
+      }, 3000);
+    }
+
+    function handleFullscreenChange() {
+      if (document.fullscreenElement) {
+        if (screen.orientation && screen.orientation.lock) {
+          screen.orientation.lock('landscape').catch(e => {
+            console.log('Orientation lock not supported');
+          });
+        }
+      } else {
+        if (screen.orientation && screen.orientation.unlock) {
+          screen.orientation.unlock();
+        }
+      }
+    }
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+
     async function playChannel(channel) {
       currentChannel = channel;
       
-      // Update player info
       document.getElementById('playerChannelTitle').textContent = channel.name;
       
       const details = document.getElementById('playerChannelDetails');
@@ -836,83 +968,81 @@
         </span>
       `;
 
-      // Search for live streams
       const liveStreams = await searchLiveStreams(channel.name);
       
       if (liveStreams && liveStreams.length > 0) {
-        // Found live stream - get the videoId
         const stream = liveStreams[0];
-        const videoId = stream.videoId;
         
-        console.log('Playing live stream:', stream.title);
-        console.log('Video ID:', videoId);
+        console.log('Playing:', stream.title);
+        console.log('Viewers:', stream.liveDetails?.concurrentViewers);
         
-        // Hide no-signal
         hideNoSignal();
+        initPlayer(stream.videoId);
         
-        // Initialize player with video ID
-        const initialized = initPlayer(videoId);
-        
-        if (!initialized) {
-          // If player not ready, show message
-          console.log('Player not ready, will play when API loads');
+        if (window.innerWidth <= 768) {
+          showRotateHint();
         }
+        
       } else {
-        // No live stream found - show No Signal
         console.log('No live streams found for:', channel.name);
         showNoSignal();
       }
 
-      // Load recommended channels based on country
       loadRecommendedChannels(channel.country, channel.id);
     }
 
-    // ==================== LOAD CHANNEL PLAYER ====================
     async function loadChannelPlayer(channelId) {
       const channel = allChannels.find(c => c.id === channelId);
       if (!channel) return;
-      
       await playChannel(channel);
     }
 
-    // ==================== LOAD RECOMMENDED CHANNELS ====================
-    function loadRecommendedChannels(country, currentId) {
+    async function loadRecommendedChannels(country, currentId) {
       const recommended = allChannels
         .filter(c => c.country === country && c.id !== currentId)
         .sort(() => 0.5 - Math.random())
         .slice(0, 6);
       
       const grid = document.getElementById('recommendedGrid');
+      grid.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>Loading recommendations...</p></div>';
       
+      let channelsToRender = recommended;
       if (recommended.length === 0) {
-        // If no channels from same country, show random channels
-        const random = allChannels
+        channelsToRender = allChannels
           .filter(c => c.id !== currentId)
           .sort(() => 0.5 - Math.random())
           .slice(0, 6);
-        renderRecommendedGrid(random);
-      } else {
-        renderRecommendedGrid(recommended);
       }
+      
+      const channelsWithThumbnails = await Promise.all(channelsToRender.map(async (channel) => {
+        const thumbnail = await getChannelThumbnail(channel.name, channel.id);
+        return { ...channel, thumbnail };
+      }));
+      
+      renderRecommendedGrid(channelsWithThumbnails);
     }
 
     function renderRecommendedGrid(channels) {
       const grid = document.getElementById('recommendedGrid');
-      grid.innerHTML = channels.map(channel => `
+      grid.innerHTML = channels.map(channel => {
+        const safeName = channel.name.replace(/'/g, "\\'");
+        const imageUrl = channel.thumbnail || channel.logo || '';
+        
+        return `
         <div class="recommended-card" onclick="router.navigate('player', '${channel.id}')">
           <div class="rec-thumbnail">
-            <img src="${channel.logo || ''}" 
-                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'112\' viewBox=\'0 0 200 112\'%3E%3Crect width=\'200\' height=\'112\' fill=\'%231a1f2f\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-family=\'Arial\' font-size=\'14\' fill=\'%233b82f6\' text-anchor=\'middle\' dy=\'.3em\'%3E${channel.name}%3C/text%3E%3C/svg%3E'">
+            <img src="${imageUrl}" 
+                 alt="${channel.name}"
+                 onerror="handleImageError(this, '${safeName}')">
           </div>
           <div class="rec-info">
             <div class="rec-name">${channel.name}</div>
             <div class="rec-country">${channel.country || 'International'}</div>
           </div>
         </div>
-      `).join('');
+      `}).join('');
     }
 
-    // ==================== RENDER HOME CHANNELS ====================
     async function renderHomeChannels() {
       const grid = document.getElementById('channelsGrid');
       grid.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>Loading channels...</p></div>';
@@ -931,15 +1061,24 @@
         return;
       }
       
-      grid.innerHTML = channels.map(channel => {
-        // Generate random viewer count for demo
+      grid.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>Loading thumbnails...</p></div>';
+      
+      const channelsWithThumbnails = await Promise.all(channels.map(async (channel) => {
+        const thumbnail = await getChannelThumbnail(channel.name, channel.id);
+        return { ...channel, thumbnail };
+      }));
+      
+      grid.innerHTML = channelsWithThumbnails.map(channel => {
         const randomViewers = Math.floor(Math.random() * 50000) + 1000;
+        const safeName = channel.name.replace(/'/g, "\\'");
+        const imageUrl = channel.thumbnail || channel.logo || '';
         
         return `
         <div class="channel-card" onclick="router.navigate('player', '${channel.id}')">
           <div class="channel-thumbnail">
-            <img src="${channel.logo || ''}" 
-                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'225\' viewBox=\'0 0 400 225\'%3E%3Crect width=\'400\' height=\'225\' fill=\'%231a1f2f\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-family=\'Arial\' font-size=\'20\' fill=\'%233b82f6\' text-anchor=\'middle\' dy=\'.3em\'%3E${channel.name}%3C/text%3E%3C/svg%3E'">
+            <img src="${imageUrl}" 
+                 alt="${channel.name}"
+                 onerror="handleImageError(this, '${safeName}')">
             <span class="live-overlay"><i class="material-icons" style="font-size: 12px;">fiber_manual_record</i> LIVE</span>
             <span class="viewer-count"><i class="material-icons" style="font-size: 12px;">visibility</i> ${randomViewers.toLocaleString()}</span>
           </div>
@@ -955,8 +1094,7 @@
       `}).join('');
     }
 
-    // ==================== SEARCH CHANNELS ====================
-    function searchChannels() {
+    async function searchChannels() {
       const query = document.getElementById('searchInput').value.toLowerCase().trim();
       
       if (!query) {
@@ -981,14 +1119,24 @@
           </div>
         `;
       } else {
-        grid.innerHTML = filtered.map(channel => {
+        grid.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>Loading thumbnails...</p></div>';
+        
+        const filteredWithThumbnails = await Promise.all(filtered.map(async (channel) => {
+          const thumbnail = await getChannelThumbnail(channel.name, channel.id);
+          return { ...channel, thumbnail };
+        }));
+        
+        grid.innerHTML = filteredWithThumbnails.map(channel => {
           const randomViewers = Math.floor(Math.random() * 50000) + 1000;
+          const safeName = channel.name.replace(/'/g, "\\'");
+          const imageUrl = channel.thumbnail || channel.logo || '';
           
           return `
           <div class="channel-card" onclick="router.navigate('player', '${channel.id}')">
             <div class="channel-thumbnail">
-              <img src="${channel.logo || ''}" 
-                   onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'225\' viewBox=\'0 0 400 225\'%3E%3Crect width=\'400\' height=\'225\' fill=\'%231a1f2f\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-family=\'Arial\' font-size=\'20\' fill=\'%233b82f6\' text-anchor=\'middle\' dy=\'.3em\'%3E${channel.name}%3C/text%3E%3C/svg%3E'">
+              <img src="${imageUrl}" 
+                   alt="${channel.name}"
+                   onerror="handleImageError(this, '${safeName}')">
               <span class="live-overlay"><i class="material-icons" style="font-size: 12px;">fiber_manual_record</i> LIVE</span>
               <span class="viewer-count"><i class="material-icons" style="font-size: 12px;">visibility</i> ${randomViewers.toLocaleString()}</span>
             </div>
@@ -1005,19 +1153,19 @@
       }
     }
 
-    // ==================== INITIALIZE ====================
     window.onload = async () => {
       await renderHomeChannels();
       
-      // Add enter key support for search
       document.getElementById('searchInput').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') searchChannels();
       });
+
+      document.getElementById('rotateHint').classList.add('hidden');
     };
 
-    // Make router and functions global
     window.router = router;
     window.searchChannels = searchChannels;
+    window.handleImageError = handleImageError;
   </script>
 </body>
 </html>
