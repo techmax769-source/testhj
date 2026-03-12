@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>Live TV Channels 📺</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #0a0f1f;
+      --bg-secondary: #151e2c;
+      --text-primary: #ffffff;
+      --text-secondary: #b0bec5;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --danger: #ef4444;
+      --success: #10b981;
+      --card-bg: rgba(21, 30, 44, 0.8);
+      --border-color: rgba(59, 130, 246, 0.3);
+      --glassy-bg: rgba(15, 25, 45, 0.7);
+      --header-height: 70px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: linear-gradient(135deg, #0a0f1f 0%, #1a1f2f 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-secondary);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--accent);
+      border-radius: 5px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--accent-hover);
+    }
+
+    /* Navbar */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--header-height);
+      background: var(--glassy-bg);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 5%;
+      z-index: 1000;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: white;
+      cursor: pointer;
+    }
+
+    .logo i {
+      color: var(--accent);
+      font-size: 2rem;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid var(--border-color);
+      border-radius: 30px;
+      padding: 8px 16px;
+      width: 300px;
+    }
+
+    .search-box input {
+      background: transparent;
+      border: none;
+      color: white;
+      width: 100%;
+      font-size: 0.9rem;
+      padding: 0 10px;
+    }
+
+    .search-box input::placeholder {
+      color: var(--text-secondary);
+    }
+
+    .search-box input:focus {
+      outline: none;
+    }
+
+    .search-box button {
+      background: transparent;
+      border: none;
+      color: var(--accent);
+      cursor: pointer;
+    }
+
+    /* Main Content */
+    .main-content {
+      padding-top: var(--header-height);
+      min-height: 100vh;
+    }
+
+    /* Home View */
+    #home-view {
+      padding: 20px 5%;
+    }
+
+    .page-title {
+      font-size: 2rem;
+      margin-bottom: 30px;
+      background: linear-gradient(135deg, #fff, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .page-title i {
+      font-size: 2.5rem;
+      -webkit-text-fill-color: initial;
+      color: var(--accent);
+    }
+
+    .live-badge {
+      background: var(--danger);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 30px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      animation: pulse 1.5s infinite;
+      margin-left: 15px;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.7; box-shadow: 0 0 10px var(--danger); }
+      100% { opacity: 1; }
+    }
+
+    /* Channels Grid */
+    .channels-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .channel-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .channel-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--accent);
+      box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+    }
+
+    .channel-thumbnail {
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: #1a1f2f;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .channel-thumbnail img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .channel-card:hover .channel-thumbnail img {
+      transform: scale(1.05);
+    }
+
+    .live-overlay {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: var(--danger);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      animation: pulse 1.5s infinite;
+      z-index: 2;
+    }
+
+    .viewer-count {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      z-index: 2;
+    }
+
+    .channel-info {
+      padding: 15px;
+    }
+
+    .channel-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: white;
+      margin-bottom: 5px;
+    }
+
+    .channel-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .channel-country {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Player View */
+    #player-view {
+      min-height: calc(100vh - var(--header-height));
+      background: #000;
+    }
+
+    .player-container {
+      width: 100%;
+      background: #000;
+      position: relative;
+    }
+
+    .video-wrapper {
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: #000;
+      position: relative;
+    }
+
+    #youtube-player {
+      width: 100%;
+      height: 100%;
+    }
+
+    .no-signal {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #0a0f1f;
+      color: var(--text-secondary);
+      z-index: 5;
+    }
+
+    .no-signal i {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      color: var(--danger);
+    }
+
+    .player-controls {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 10;
+      display: flex;
+      gap: 10px;
+    }
+
+    .back-btn {
+      background: var(--glassy-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border-color);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 30px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .back-btn:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .channel-info-bar {
+      padding: 20px 5%;
+      background: var(--glassy-bg);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .channel-info-bar h1 {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+      color: white;
+    }
+
+    .channel-details {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .detail-badge {
+      background: rgba(59, 130, 246, 0.2);
+      border: 1px solid var(--border-color);
+      padding: 6px 12px;
+      border-radius: 30px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .detail-badge.live {
+      background: var(--danger);
+      color: white;
+      border-color: var(--danger);
+      animation: pulse 1.5s infinite;
+    }
+
+    .detail-badge i {
+      font-size: 1rem;
+    }
+
+    /* Developer Card */
+    .developer-card {
+      margin: 30px 5%;
+      padding: 20px;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.1));
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .dev-info {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .dev-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: 700;
+      color: white;
+    }
+
+    .dev-text h3 {
+      font-size: 1.2rem;
+      margin-bottom: 5px;
+      color: white;
+    }
+
+    .dev-text p {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .dev-social {
+      display: flex;
+      gap: 15px;
+    }
+
+    .whatsapp-btn {
+      background: #25D366;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 30px;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .whatsapp-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(37, 211, 102, 0.3);
+    }
+
+    /* Recommended Section */
+    .recommended-section {
+      padding: 0 5% 40px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .section-header h2 {
+      font-size: 1.5rem;
+      color: white;
+    }
+
+    .recommended-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    .recommended-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .recommended-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--accent);
+    }
+
+    .rec-thumbnail {
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: #1a1f2f;
+    }
+
+    .rec-thumbnail img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .rec-info {
+      padding: 10px;
+    }
+
+    .rec-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: white;
+      margin-bottom: 4px;
+    }
+
+    .rec-country {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+    }
+
+    /* Loading States */
+    .loading-spinner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 50px;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 3px solid rgba(59, 130, 246, 0.3);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .navbar {
+        padding: 0 15px;
+      }
+
+      .search-box {
+        width: 200px;
+      }
+
+      .channels-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      }
+
+      .developer-card {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .dev-info {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .recommended-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .channel-info-bar h1 {
+        font-size: 1.2rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .search-box {
+        width: 150px;
+      }
+
+      .channels-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+  <!-- Load YouTube IFrame API -->
+  <script src="https://www.youtube.com/iframe_api"></script>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="logo" onclick="router.navigate('home')">
+      <i class="fas fa-tv"></i>
+      <span>Live TV Channels</span>
+      <span class="live-badge">LIVE</span>
+    </div>
+    <div class="nav-actions">
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Search channels...">
+        <button onclick="searchChannels()"><i class="material-icons">search</i></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Home View -->
+    <div id="home-view">
+      <div class="page-title">
+        <i class="fas fa-satellite-dish"></i>
+        Live TV Channels
+      </div>
+      <div id="channelsGrid" class="channels-grid"></div>
+    </div>
+
+    <!-- Player View -->
+    <div id="player-view" class="hidden">
+      <div class="player-container">
+        <div class="video-wrapper" id="videoWrapper">
+          <!-- YouTube Player Container for IFrame API -->
+          <div id="youtube-player"></div>
+
+          <!-- No Signal overlay for when channel is offline -->
+          <div class="no-signal hidden" id="noSignal">
+            <i class="fas fa-broadcast-tower"></i>
+            <h2>No Signal</h2>
+            <p>The channel is currently offline</p>
+          </div>
+          
+          <div class="player-controls">
+            <button class="back-btn" onclick="router.navigate('home')">
+              <i class="material-icons">arrow_back</i>
+              Back to Channels
+            </button>
+          </div>
+        </div>
+        
+        <div class="channel-info-bar" id="playerChannelInfo">
+          <h1 id="playerChannelTitle">Loading...</h1>
+          <div class="channel-details" id="playerChannelDetails"></div>
+        </div>
+
+        <!-- Developer Card -->
+        <div class="developer-card">
+          <div class="dev-info">
+            <div class="dev-avatar">M</div>
+            <div class="dev-text">
+              <h3>Project Developed by Max ❤️</h3>
+              <p>The app has thousands of live TV channels from around the world and all for FREE! 🍿✨<br>Made with love for entertainment.</p>
+            </div>
+          </div>
+          <div class="dev-social">
+            <a href="https://wa.me/254738734134" target="_blank" class="whatsapp-btn">
+              <i class="fab fa-whatsapp"></i>
+              Contact Developer
+            </a>
+          </div>
+        </div>
+
+        <!-- Recommended Channels -->
+        <div class="recommended-section">
+          <div class="section-header">
+            <h2>Recommended Channels</h2>
+            <i class="material-icons" style="color: var(--accent);">recommend</i>
+          </div>
+          <div id="recommendedGrid" class="recommended-grid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==================== CONFIGURATION ====================
+    const TV_API = 'https://channelsbackendyt.vercel.app/api';
+    let allChannels = [];
+    let currentChannel = null;
+    let youtubePlayer = null;
+    let playerReady = false;
+
+    // ==================== ROUTER ====================
+    const router = {
+      navigate(view, channelId = null) {
+        if (view === 'home') {
+          document.getElementById('home-view').classList.remove('hidden');
+          document.getElementById('player-view').classList.add('hidden');
+          document.title = 'Live TV Channels 📺';
+          stopVideo();
+        } else if (view === 'player' && channelId) {
+          document.getElementById('home-view').classList.add('hidden');
+          document.getElementById('player-view').classList.remove('hidden');
+          loadChannelPlayer(channelId);
+        }
+      }
+    };
+
+    // ==================== YOUTUBE PLAYER API ====================
+    // This function is called automatically when YouTube API is ready
+    window.onYouTubeIframeAPIReady = function() {
+      console.log('YouTube IFrame API is ready');
+      playerReady = true;
+      // If we have a channel waiting to be played, play it now
+      if (currentChannel && document.getElementById('player-view').classList.contains('hidden') === false) {
+        playChannel(currentChannel);
+      }
+    };
+
+    function initPlayer(videoId) {
+      if (!playerReady) {
+        console.log('Player not ready yet, waiting...');
+        return false;
+      }
+
+      // Destroy existing player if it exists
+      if (youtubePlayer) {
+        youtubePlayer.destroy();
+      }
+
+      // Create new player
+      youtubePlayer = new YT.Player('youtube-player', {
+        videoId: videoId,
+        playerVars: {
+          'autoplay': 1,
+          'mute': 1,
+          'controls': 1,
+          'modestbranding': 1,
+          'rel': 0,
+          'showinfo': 0,
+          'fs': 1,
+          'playsinline': 1,
+          'enablejsapi': 1,
+          'origin': window.location.origin
+        },
+        events: {
+          'onReady': onPlayerReady,
+          'onStateChange': onPlayerStateChange,
+          'onError': onPlayerError
+        }
+      });
+      return true;
+    }
+
+    function onPlayerReady(event) {
+      console.log('Player is ready');
+      document.getElementById('noSignal').classList.add('hidden');
+      event.target.playVideo();
+    }
+
+    function onPlayerStateChange(event) {
+      if (event.data === YT.PlayerState.PLAYING) {
+        console.log('Video is playing');
+      } else if (event.data === YT.PlayerState.ENDED) {
+        console.log('Video ended');
+      } else if (event.data === YT.PlayerState.PAUSED) {
+        console.log('Video paused');
+      }
+    }
+
+    function onPlayerError(event) {
+      console.error('Player error:', event.data);
+      showNoSignal();
+    }
+
+    // ==================== API FUNCTIONS ====================
+    async function fetchAllChannels() {
+      try {
+        const response = await fetch(`${TV_API}/channels`);
+        const data = await response.json();
+        allChannels = data.channels || [];
+        return allChannels;
+      } catch (error) {
+        console.error('Error fetching channels:', error);
+        return [];
+      }
+    }
+
+    async function searchLiveStreams(query) {
+      try {
+        const response = await fetch(`${TV_API}/search?q=${encodeURIComponent(query)}&max=5`);
+        const data = await response.json();
+        return data.results || [];
+      } catch (error) {
+        console.error('Error searching live streams:', error);
+        return [];
+      }
+    }
+
+    // ==================== VIDEO PLAYER ====================
+    function stopVideo() {
+      if (youtubePlayer) {
+        youtubePlayer.stopVideo();
+        youtubePlayer.destroy();
+        youtubePlayer = null;
+      }
+      document.getElementById('noSignal').classList.add('hidden');
+    }
+
+    function showNoSignal() {
+      document.getElementById('noSignal').classList.remove('hidden');
+      if (youtubePlayer) {
+        youtubePlayer.stopVideo();
+      }
+    }
+
+    function hideNoSignal() {
+      document.getElementById('noSignal').classList.add('hidden');
+    }
+
+    async function playChannel(channel) {
+      currentChannel = channel;
+      
+      // Update player info
+      document.getElementById('playerChannelTitle').textContent = channel.name;
+      
+      const details = document.getElementById('playerChannelDetails');
+      details.innerHTML = `
+        <span class="detail-badge live">
+          <i class="material-icons">fiber_manual_record</i> LIVE
+        </span>
+        <span class="detail-badge">
+          <i class="material-icons">place</i> ${channel.country || 'International'}
+        </span>
+        <span class="detail-badge">
+          <i class="material-icons">category</i> ${channel.category || 'General'}
+        </span>
+      `;
+
+      // Search for live streams
+      const liveStreams = await searchLiveStreams(channel.name);
+      
+      if (liveStreams && liveStreams.length > 0) {
+        // Found live stream - get the videoId
+        const stream = liveStreams[0];
+        const videoId = stream.videoId;
+        
+        console.log('Playing live stream:', stream.title);
+        console.log('Video ID:', videoId);
+        
+        // Hide no-signal
+        hideNoSignal();
+        
+        // Initialize player with video ID
+        const initialized = initPlayer(videoId);
+        
+        if (!initialized) {
+          // If player not ready, show message
+          console.log('Player not ready, will play when API loads');
+        }
+      } else {
+        // No live stream found - show No Signal
+        console.log('No live streams found for:', channel.name);
+        showNoSignal();
+      }
+
+      // Load recommended channels based on country
+      loadRecommendedChannels(channel.country, channel.id);
+    }
+
+    // ==================== LOAD CHANNEL PLAYER ====================
+    async function loadChannelPlayer(channelId) {
+      const channel = allChannels.find(c => c.id === channelId);
+      if (!channel) return;
+      
+      await playChannel(channel);
+    }
+
+    // ==================== LOAD RECOMMENDED CHANNELS ====================
+    function loadRecommendedChannels(country, currentId) {
+      const recommended = allChannels
+        .filter(c => c.country === country && c.id !== currentId)
+        .sort(() => 0.5 - Math.random())
+        .slice(0, 6);
+      
+      const grid = document.getElementById('recommendedGrid');
+      
+      if (recommended.length === 0) {
+        // If no channels from same country, show random channels
+        const random = allChannels
+          .filter(c => c.id !== currentId)
+          .sort(() => 0.5 - Math.random())
+          .slice(0, 6);
+        renderRecommendedGrid(random);
+      } else {
+        renderRecommendedGrid(recommended);
+      }
+    }
+
+    function renderRecommendedGrid(channels) {
+      const grid = document.getElementById('recommendedGrid');
+      grid.innerHTML = channels.map(channel => `
+        <div class="recommended-card" onclick="router.navigate('player', '${channel.id}')">
+          <div class="rec-thumbnail">
+            <img src="${channel.logo || ''}" 
+                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'112\' viewBox=\'0 0 200 112\'%3E%3Crect width=\'200\' height=\'112\' fill=\'%231a1f2f\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-family=\'Arial\' font-size=\'14\' fill=\'%233b82f6\' text-anchor=\'middle\' dy=\'.3em\'%3E${channel.name}%3C/text%3E%3C/svg%3E'">
+          </div>
+          <div class="rec-info">
+            <div class="rec-name">${channel.name}</div>
+            <div class="rec-country">${channel.country || 'International'}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // ==================== RENDER HOME CHANNELS ====================
+    async function renderHomeChannels() {
+      const grid = document.getElementById('channelsGrid');
+      grid.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>Loading channels...</p></div>';
+      
+      const channels = await fetchAllChannels();
+      
+      if (channels.length === 0) {
+        grid.innerHTML = `
+          <div style="grid-column: 1/-1; text-align: center; padding: 50px;">
+            <i class="material-icons" style="font-size: 48px; color: var(--text-secondary);">wifi_off</i>
+            <h3 style="margin: 20px 0; color: white;">No channels available</h3>
+            <p style="color: var(--text-secondary);">Please check your connection and try again</p>
+            <button onclick="renderHomeChannels()" style="margin-top: 20px; padding: 10px 30px; background: var(--accent); border: none; border-radius: 30px; color: white; cursor: pointer;">Retry</button>
+          </div>
+        `;
+        return;
+      }
+      
+      grid.innerHTML = channels.map(channel => {
+        // Generate random viewer count for demo
+        const randomViewers = Math.floor(Math.random() * 50000) + 1000;
+        
+        return `
+        <div class="channel-card" onclick="router.navigate('player', '${channel.id}')">
+          <div class="channel-thumbnail">
+            <img src="${channel.logo || ''}" 
+                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'225\' viewBox=\'0 0 400 225\'%3E%3Crect width=\'400\' height=\'225\' fill=\'%231a1f2f\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-family=\'Arial\' font-size=\'20\' fill=\'%233b82f6\' text-anchor=\'middle\' dy=\'.3em\'%3E${channel.name}%3C/text%3E%3C/svg%3E'">
+            <span class="live-overlay"><i class="material-icons" style="font-size: 12px;">fiber_manual_record</i> LIVE</span>
+            <span class="viewer-count"><i class="material-icons" style="font-size: 12px;">visibility</i> ${randomViewers.toLocaleString()}</span>
+          </div>
+          <div class="channel-info">
+            <div class="channel-name">${channel.name}</div>
+            <div class="channel-meta">
+              <span class="channel-country"><i class="material-icons" style="font-size: 14px;">place</i> ${channel.country || 'International'}</span>
+              <span>•</span>
+              <span>${channel.category || 'General'}</span>
+            </div>
+          </div>
+        </div>
+      `}).join('');
+    }
+
+    // ==================== SEARCH CHANNELS ====================
+    function searchChannels() {
+      const query = document.getElementById('searchInput').value.toLowerCase().trim();
+      
+      if (!query) {
+        renderHomeChannels();
+        return;
+      }
+      
+      const filtered = allChannels.filter(channel => 
+        channel.name.toLowerCase().includes(query) ||
+        (channel.country && channel.country.toLowerCase().includes(query)) ||
+        (channel.category && channel.category.toLowerCase().includes(query))
+      );
+      
+      const grid = document.getElementById('channelsGrid');
+      
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div style="grid-column: 1/-1; text-align: center; padding: 50px;">
+            <i class="material-icons" style="font-size: 48px; color: var(--text-secondary);">search_off</i>
+            <h3 style="margin: 20px 0; color: white;">No channels found</h3>
+            <p style="color: var(--text-secondary);">Try searching with different keywords</p>
+          </div>
+        `;
+      } else {
+        grid.innerHTML = filtered.map(channel => {
+          const randomViewers = Math.floor(Math.random() * 50000) + 1000;
+          
+          return `
+          <div class="channel-card" onclick="router.navigate('player', '${channel.id}')">
+            <div class="channel-thumbnail">
+              <img src="${channel.logo || ''}" 
+                   onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'225\' viewBox=\'0 0 400 225\'%3E%3Crect width=\'400\' height=\'225\' fill=\'%231a1f2f\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-family=\'Arial\' font-size=\'20\' fill=\'%233b82f6\' text-anchor=\'middle\' dy=\'.3em\'%3E${channel.name}%3C/text%3E%3C/svg%3E'">
+              <span class="live-overlay"><i class="material-icons" style="font-size: 12px;">fiber_manual_record</i> LIVE</span>
+              <span class="viewer-count"><i class="material-icons" style="font-size: 12px;">visibility</i> ${randomViewers.toLocaleString()}</span>
+            </div>
+            <div class="channel-info">
+              <div class="channel-name">${channel.name}</div>
+              <div class="channel-meta">
+                <span class="channel-country"><i class="material-icons" style="font-size: 14px;">place</i> ${channel.country || 'International'}</span>
+                <span>•</span>
+                <span>${channel.category || 'General'}</span>
+              </div>
+            </div>
+          </div>
+        `}).join('');
+      }
+    }
+
+    // ==================== INITIALIZE ====================
+    window.onload = async () => {
+      await renderHomeChannels();
+      
+      // Add enter key support for search
+      document.getElementById('searchInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') searchChannels();
+      });
+    };
+
+    // Make router and functions global
+    window.router = router;
+    window.searchChannels = searchChannels;
+  </script>
+</body>
+</html>
