@@ -8,6 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Plyr CSS -->
+  <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
   <style>
     * {
       margin: 0;
@@ -28,6 +30,11 @@
       --border-color: rgba(59, 130, 246, 0.3);
       --glassy-bg: rgba(15, 25, 45, 0.7);
       --header-height: 70px;
+      --plyr-color-main: var(--accent);
+      --plyr-video-controls-background: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0.75));
+      --plyr-video-control-color: white;
+      --plyr-video-control-color-hover: white;
+      --plyr-video-control-background-hover: var(--accent);
     }
 
     body {
@@ -306,27 +313,32 @@
       aspect-ratio: 16/9;
       background: #000;
       position: relative;
-      overflow: hidden;
     }
 
-    /* YouTube Player Container */
-    #youtube-player {
-      width: 100%;
-      height: 100%;
-      position: absolute;
-      top: 0;
-      left: 0;
+    /* Plyr custom styling */
+    .plyr {
+      --plyr-color-main: var(--accent);
+      --plyr-video-controls-background: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0.75));
+      --plyr-menu-color: white;
+      --plyr-menu-background: var(--glassy-bg);
+      border-radius: 0;
     }
 
-    /* Hide YouTube logo and other branding */
-    .ytp-logo,
-    .ytp-watermark,
-    .ytp-youtube-button,
-    .ytp-title-link,
-    .ytp-title-channel,
-    .ytp-title-text,
-    .ytp-ce-element {
-      display: none !important;
+    .plyr__controls {
+      backdrop-filter: blur(10px);
+      background: var(--plyr-video-controls-background) !important;
+    }
+
+    .plyr__control--overlaid {
+      background: var(--accent);
+    }
+
+    .plyr__control--overlaid:hover {
+      background: var(--accent-hover);
+    }
+
+    .plyr--video .plyr__control:hover {
+      background: var(--accent) !important;
     }
 
     .no-signal {
@@ -653,8 +665,8 @@
     }
   </style>
   <meta name="referrer" content="strict-origin-when-cross-origin">
-  <!-- YouTube IFrame API -->
-  <script src="https://www.youtube.com/iframe_api"></script>
+  <!-- Plyr JS -->
+  <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
 </head>
 <body>
   <nav class="navbar">
@@ -683,8 +695,15 @@
     <div id="player-view" class="hidden">
       <div class="player-container">
         <div class="video-wrapper" id="videoWrapper">
-          <!-- YouTube Player Container for IFrame API -->
-          <div id="youtube-player"></div>
+          <!-- Plyr player container -->
+          <div class="plyr__video-embed" id="player">
+            <iframe
+              src=""
+              allowfullscreen
+              allowtransparency
+              allow="autoplay"
+            ></iframe>
+          </div>
 
           <div class="no-signal hidden" id="noSignal">
             <i class="fas fa-broadcast-tower"></i>
@@ -743,8 +762,7 @@
     let currentChannel = null;
     let thumbnailCache = new Map();
     let liveStreamsCache = new Map();
-    let youtubePlayer = null;
-    let playerReady = false;
+    let player = null;
 
     const router = {
       navigate(view, channelId = null) {
@@ -760,86 +778,6 @@
         }
       }
     };
-
-    // YouTube API ready
-    window.onYouTubeIframeAPIReady = function() {
-      console.log('YouTube IFrame API ready');
-      playerReady = true;
-    };
-
-    function initPlayer(videoId) {
-      if (!playerReady) {
-        console.log('Player not ready, will play when API loads');
-        // Store videoId to play when ready
-        setTimeout(() => {
-          if (playerReady && videoId) {
-            createPlayer(videoId);
-          }
-        }, 500);
-        return;
-      }
-      createPlayer(videoId);
-    }
-
-    function createPlayer(videoId) {
-      if (youtubePlayer) {
-        youtubePlayer.destroy();
-      }
-
-      youtubePlayer = new YT.Player('youtube-player', {
-        videoId: videoId,
-        playerVars: {
-          'autoplay': 1,
-          'mute': 0,
-          'controls': 1,
-          'modestbranding': 1,
-          'rel': 0,
-          'showinfo': 0,
-          'iv_load_policy': 3,
-          'fs': 1,
-          'playsinline': 1,
-          'enablejsapi': 1,
-          'origin': window.location.origin
-        },
-        events: {
-          'onReady': onPlayerReady,
-          'onStateChange': onPlayerStateChange,
-          'onError': onPlayerError
-        }
-      });
-    }
-
-    function onPlayerReady(event) {
-      console.log('Player ready');
-      document.getElementById('noSignal').classList.add('hidden');
-      
-      // Try to hide YouTube logo using CSS (already in styles)
-      const iframe = document.getElementById('youtube-player');
-      if (iframe) {
-        // Inject CSS to hide YouTube logo
-        const style = document.createElement('style');
-        style.textContent = `
-          .ytp-logo, .ytp-watermark, .ytp-youtube-button, 
-          .ytp-title-link, .ytp-title-channel, .ytp-title-text,
-          .ytp-ce-element {
-            display: none !important;
-          }
-        `;
-        iframe.contentDocument?.head.appendChild(style);
-      }
-    }
-
-    function onPlayerStateChange(event) {
-      if (event.data === YT.PlayerState.PLAYING) {
-        console.log('Playing');
-        document.getElementById('noSignal').classList.add('hidden');
-      }
-    }
-
-    function onPlayerError(event) {
-      console.error('Player error:', event.data);
-      showNoSignal();
-    }
 
     async function fetchAllChannels() {
       try {
@@ -906,18 +844,17 @@
     }
 
     function stopVideo() {
-      if (youtubePlayer) {
-        youtubePlayer.stopVideo();
-        youtubePlayer.destroy();
-        youtubePlayer = null;
+      if (player) {
+        player.destroy();
+        player = null;
       }
       document.getElementById('noSignal').classList.add('hidden');
     }
 
     function showNoSignal() {
       document.getElementById('noSignal').classList.remove('hidden');
-      if (youtubePlayer) {
-        youtubePlayer.stopVideo();
+      if (player) {
+        player.pause();
       }
     }
 
@@ -977,7 +914,30 @@
         console.log('Viewers:', stream.liveDetails?.concurrentViewers);
         
         hideNoSignal();
-        initPlayer(stream.videoId);
+        
+        // Clean YouTube URL for Plyr
+        const cleanEmbedUrl = `https://www.youtube-nocookie.com/embed/${stream.videoId}?iv_load_policy=3&modestbranding=1&playsinline=1&rel=0&enablejsapi=1`;
+        
+        // Update iframe src
+        const iframe = document.querySelector('#player iframe');
+        iframe.src = cleanEmbedUrl;
+        
+        // Initialize Plyr
+        if (player) {
+          player.destroy();
+        }
+        
+        player = new Plyr('#player', {
+          controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'settings', 'fullscreen'],
+          settings: ['speed'],
+          speed: { selected: 1, options: [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2] },
+          keyboard: { focused: true, global: true },
+          tooltips: { controls: true, seek: true },
+          invertTime: false,
+          toggleInvert: false,
+          autoplay: true,
+          muted: false
+        });
         
         if (window.innerWidth <= 768) {
           showRotateHint();
